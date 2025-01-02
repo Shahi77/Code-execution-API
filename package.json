@@ -15,6 +15,7 @@
     "cookie-parse": "^0.4.0",
     "cookie-parser": "^1.4.7",
     "cors": "^2.8.5",
+    "dockerode": "^4.0.2",
     "dotenv": "^16.4.7",
     "express": "^4.21.2"
   }

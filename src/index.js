@@ -3,6 +3,7 @@ const cors = require("cors");
 const path = require("path");
 const cookieParser = require("cookie-parser");
 const bodyParser = require("body-parser");
+const v1Router = require("./routes/version1Routes");
 require("dotenv").config();
 
 const PORT = process.env.PORT || 3001;
@@ -22,6 +23,7 @@ app.use(express.urlencoded({ extended: true, limit: "16kb" }));
 app.use(express.static(path.resolve("./public")));
 app.use(cookieParser());
 
+app.use("/v1", v1Router);
 const init = async () => {
   app.listen(PORT, () => {
     console.log(`Server started on port ${PORT}`);
