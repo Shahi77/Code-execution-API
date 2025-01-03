@@ -1,9 +1,9 @@
-FROM node:18-slim
+FROM node:18-alpine
 
 WORKDIR /home/app
 
 # Copy package.json and install dependencies
-COPY package.json /home/app
+COPY package.json package-lock.json ./ 
 RUN npm install
 
 # Copy the rest of the source code

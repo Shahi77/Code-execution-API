@@ -1,7 +1,8 @@
 const Docker = require("dockerode");
+const path = require("path");
 const fs = require("fs");
-const docker = new Docker();
 
+const docker = new Docker();
 const executeCode = async (req, res) => {
   const { language, code } = req.body;
 
@@ -11,40 +12,76 @@ const executeCode = async (req, res) => {
 
   let imageName;
   if (language === "python") {
-    imageName = "python:3.9-slim"; //Python image
+    imageName = "python:3.9-slim";
   } else {
     return res.status(400).json({ error: "Unsupported language" });
   }
 
   try {
-    // Write code to a temporary file
-    const codePath = `${__dirname}/temp_code.py`;
-    fs.writeFileSync(codePath, code);
+    // Ensure temp directory exists
+    const tempDir = path.join(__dirname, "../temp");
+    if (!fs.existsSync(tempDir)) {
+      fs.mkdirSync(tempDir);
+    }
 
-    // Create and start Docker container
+    const uniqueFilename = `temp_code_${Date.now()}.py`;
+    const codePath = path.join(tempDir, uniqueFilename);
+
+    // Write code to a temporary file
+    console.log("Writing code to:", codePath);
+    fs.writeFileSync(codePath, code);
+    console.log("Code written successfully");
+
+    //Docker execution
     const container = await docker.createContainer({
       Image: imageName,
       Tty: false,
       Cmd: ["python", "/app/temp_code.py"],
       HostConfig: {
-        Binds: [`${__dirname}:/app`], // Bind temp directory
+        Binds: [`${tempDir}:/app`], // Bind temp directory
       },
     });
 
     await container.start();
 
-    const logs = await container.logs({
-      stdout: true,
-      stderr: true,
-    });
+    try {
+      const stream = await container.logs({
+        stdout: true,
+        stderr: true,
+        follow: true,
+      });
 
-    res.json({ output: logs.toString() });
+      let output = "";
+      stream.on("data", (chunk) => {
+        output += chunk.toString("utf8");
+      });
+
+      stream.on("end", () => {
+        console.log("Execution Output (Stream):", output.trim());
+        res.json({ output: output.trim() });
+      });
+
+      stream.on("error", (err) => {
+        console.error("Error reading logs stream:", err.message);
+        res.status(500).json({
+          error: "Failed to read logs",
+          details: err.message,
+        });
+      });
+    } catch (error) {
+      console.error("Error fetching container logs:", error.message);
+      res.status(500).json({
+        error: "Failed to retrieve logs",
+        details: error.message,
+      });
+    }
 
     // Cleanup
     await container.stop();
     await container.remove();
-    fs.unlinkSync(codePath); // Remove temp file
+    fs.unlinkSync(codePath); // Delete the temp file
   } catch (error) {
+    console.error("Error during code execution:", error.message);
     res.status(500).json({ error: "Execution failed", details: error.message });
   }
 };
