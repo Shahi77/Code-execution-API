@@ -18,6 +18,32 @@ const executeCode = async (req, res) => {
       fileName = "temp_code";
       command = ["python", `/app/${fileName}.${extension}`];
       break;
+    case "javascript":
+      imageName = "node:slim";
+      extension = "js";
+      fileName = "temp_code";
+      command = ["node", `/app/${fileName}.${extension}`];
+      break;
+    case "c":
+      imageName = "gcc:latest";
+      extension = "c";
+      fileName = "temp_code";
+      command = [
+        "sh",
+        "-c",
+        `gcc /app/${fileName}.c -o /app/${fileName} && /app/${fileName}`,
+      ];
+      break;
+    case "cpp":
+      imageName = "gcc:latest";
+      extension = "cpp";
+      fileName = "temp_code";
+      command = [
+        "sh",
+        "-c",
+        `g++ /app/${fileName}.cpp -o /app/${fileName} && /app/${fileName}`,
+      ];
+      break;
 
     default:
       return res.status(400).json({ error: "Unsupported language" });
