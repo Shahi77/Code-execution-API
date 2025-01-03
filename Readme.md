@@ -6,3 +6,27 @@ A backend service that allows users to submit code snippets in various programmi
    - Run code snippets in various programming languages.
    - Get real-time outputs or errors.
    - Implement containerization (Docker) for execution.
+
+## Folder Structure of Application
+
+```
+.
+├── src
+│  ├── controllers
+│  │  └── executeCode.js
+│  ├── routes
+│  │  ├── executeRoutes.js
+│  │  └── version1Routes.js
+│  ├── temp
+│  ├── Dockerfile
+│  └── index.js
+├── .env
+├── .gitignore
+├── package-lock.json
+├── package.json
+└── Readme.md
+```
+
+## API Reference
+
+Test API Endpoints: [Postman Collection]()
