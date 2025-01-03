@@ -36,7 +36,7 @@ const executeCode = async (req, res) => {
     const container = await docker.createContainer({
       Image: imageName,
       Tty: false,
-      Cmd: ["python", "/app/temp_code.py"],
+      Cmd: ["python", `/app/${uniqueFilename}`],
       HostConfig: {
         Binds: [`${tempDir}:/app`], // Bind temp directory
       },
