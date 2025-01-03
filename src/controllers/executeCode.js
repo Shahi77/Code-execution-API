@@ -10,11 +10,17 @@ const executeCode = async (req, res) => {
     return res.status(400).json({ error: "Language and code are required" });
   }
 
-  let imageName;
-  if (language === "python") {
-    imageName = "python:3.9-slim";
-  } else {
-    return res.status(400).json({ error: "Unsupported language" });
+  let imageName, extension, command, fileName;
+  switch (language.toLowerCase()) {
+    case "python":
+      imageName = "python:3.9-slim";
+      extension = "py";
+      fileName = "temp_code";
+      command = ["python", `/app/${fileName}.${extension}`];
+      break;
+
+    default:
+      return res.status(400).json({ error: "Unsupported language" });
   }
 
   try {
@@ -24,19 +30,18 @@ const executeCode = async (req, res) => {
       fs.mkdirSync(tempDir);
     }
 
-    const uniqueFilename = `temp_code_${Date.now()}.py`;
-    const codePath = path.join(tempDir, uniqueFilename);
+    const codePath = path.join(tempDir, `${fileName}.${extension}`);
 
     // Write code to a temporary file
     console.log("Writing code to:", codePath);
     fs.writeFileSync(codePath, code);
     console.log("Code written successfully");
 
-    //Docker execution
+    // Docker execution
     const container = await docker.createContainer({
       Image: imageName,
       Tty: false,
-      Cmd: ["python", `/app/${uniqueFilename}`],
+      Cmd: command,
       HostConfig: {
         Binds: [`${tempDir}:/app`], // Bind temp directory
       },
