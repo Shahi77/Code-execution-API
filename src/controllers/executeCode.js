@@ -44,7 +44,26 @@ const executeCode = async (req, res) => {
         `g++ /app/${fileName}.cpp -o /app/${fileName} && /app/${fileName}`,
       ];
       break;
+    case "java":
+      imageName = "openjdk:slim";
+      extension = "java";
 
+      // Extract the public class name from the Java code
+      const classNameMatch = code.match(
+        /public\s+class\s+([a-zA-Z_][a-zA-Z0-9_]*)/
+      );
+      if (!classNameMatch) {
+        return res
+          .status(400)
+          .json({ error: "Invalid Java code. Missing public class." });
+      }
+      fileName = classNameMatch[1]; // Use the class name as the file name
+      command = [
+        "sh",
+        "-c",
+        `javac /app/${fileName}.java && java -cp /app ${fileName}`,
+      ];
+      break;
     default:
       return res.status(400).json({ error: "Unsupported language" });
   }
