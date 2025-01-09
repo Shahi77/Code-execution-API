@@ -11,7 +11,7 @@ const processQueue = async () => {
     const task = await redisQueue.consumeFromQueue("code_execution_queue");
     if (!task) continue;
 
-    const { language, code } = task;
+    const { language, code, taskId } = task;
     let imageName, extension, command, fileName;
 
     try {
@@ -81,16 +81,13 @@ const processQueue = async () => {
       }
 
       const codePath = path.join(tempDir, `${fileName}.${extension}`);
-
-      // Write code to a temporary file
-      console.log("Writing code to:", codePath);
       fs.writeFileSync(codePath, code);
       console.log("Code written successfully");
 
       // Docker execution
       const container = await docker.createContainer({
         Image: imageName,
-        Tty: false,
+        Tty: true,
         Cmd: command,
         HostConfig: {
           Binds: [`${tempDir}:/app`], // Bind temp directory
@@ -98,8 +95,8 @@ const processQueue = async () => {
       });
 
       await container.start();
+      console.log("Container started successfully");
 
-      let output = "";
       try {
         const stream = await container.logs({
           stdout: true,
@@ -107,71 +104,41 @@ const processQueue = async () => {
           follow: true,
         });
 
-        for await (const chunk of stream) {
+        let output = "";
+        stream.on("data", (chunk) => {
           output += chunk.toString("utf8");
-        }
-      } catch (logError) {
-        console.error("Error fetching container logs:", logError.message);
-        throw new Error("Failed to retrieve logs.");
+        });
+
+        stream.on("end", async () => {
+          console.log("Execution Output (Stream):", output.trim());
+          // Save the output in Redis with a unique key based on taskId
+          const resultKey = `execution_result:${taskId}`;
+          await redisQueue.redisClient.set(
+            resultKey,
+            output.trim(),
+            "EX",
+            3600
+          );
+          console.log(`Result saved at key: ${resultKey}`);
+        });
+
+        stream.on("error", (err) => {
+          console.error("Error reading logs stream:", err.message);
+        });
+      } catch (error) {
+        console.error("Error fetching container logs:", error.message);
+        res.status(500).json({
+          error: "Failed to retrieve logs",
+          details: error.message,
+        });
       }
-      //   try {
-      //     const stream = await container.logs({
-      //       stdout: true,
-      //       stderr: true,
-      //       follow: true,
-      //     });
-
-      //     let output = "";
-      //     stream.on("data", (chunk) => {
-      //       output += chunk.toString("utf8");
-      //     });
-
-      //     stream.on("end", () => {
-      //       console.log("Execution Output (Stream):", output.trim());
-      //       res.json({ output: output.trim() });
-      //     });
-
-      //     stream.on("error", (err) => {
-      //       console.error("Error reading logs stream:", err.message);
-      //       res.status(500).json({
-      //         error: "Failed to read logs",
-      //         details: err.message,
-      //       });
-      //     });
-      //   } catch (error) {
-      //     console.error("Error fetching container logs:", error.message);
-      //     res.status(500).json({
-      //       error: "Failed to retrieve logs",
-      //       details: error.message,
-      //     });
-      //   }
 
       // Cleanup
       await container.stop();
       await container.remove();
       fs.unlinkSync(codePath);
-
-      // Store execution result in Redis
-      const resultKey = `execution_result:${new Date().getTime()}`;
-      await redisQueue.redisClient.set(
-        resultKey,
-        JSON.stringify({ output: output.trim() }),
-        "EX",
-        3600 // Expires in 1 hour
-      );
-      console.log(`Execution completed. Result stored at key: ${resultKey}`);
     } catch (error) {
       console.error("Error processing task:", error.message);
-
-      // Store error result in Redis
-      const errorKey = `execution_error:${new Date().getTime()}`;
-      await redisQueue.redisClient.set(
-        errorKey,
-        JSON.stringify({ error: error.message }),
-        "EX",
-        3600 // Expires in 1 hour
-      );
-      console.log(`Error stored at key: ${errorKey}`);
     }
   }
 };

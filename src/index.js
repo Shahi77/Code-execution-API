@@ -24,6 +24,8 @@ app.use(express.static(path.resolve("./public")));
 app.use(cookieParser());
 
 app.use("/v1", v1Router);
+// Start worker
+require("./controllers/codeController"); // This will start the worker automatically
 const init = async () => {
   app.listen(PORT, () => {
     console.log(`Server started on port ${PORT}`);
