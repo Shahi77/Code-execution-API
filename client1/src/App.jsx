@@ -1,4 +1,4 @@
-import CodeRunner from "./CodeRunner";
+import CodeRunner from "./CodeRunner.jsx";
 import "./App.css";
 
 function App() {

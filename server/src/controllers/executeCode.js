@@ -10,7 +10,7 @@ const executeCode = async (req, res) => {
 
   try {
     const taskId = uuidv4();
-    await redisQueue.addToQueue("code_execution_queue", {
+    await redisQueue.addToQueue("code_execution:queue", {
       language,
       code,
       taskId,

@@ -3,7 +3,7 @@ const Docker = require("dockerode");
 const path = require("path");
 const fs = require("fs");
 
-const docker = new Docker();
+const docker = new Docker(); // Windows-compatible
 
 const processQueue = async () => {
   console.log("Worker started, waiting for tasks...");
@@ -110,15 +110,16 @@ const processQueue = async () => {
         });
 
         stream.on("end", async () => {
-          console.log("Execution Output (Stream):", output.trim());
-          // Save the output in Redis with a unique key based on taskId
           const resultKey = `execution_result:${taskId}`;
+
+          console.log("Saving result in Redis:", resultKey, output.trim());
           await redisQueue.redisClient.set(
             resultKey,
             output.trim(),
             "EX",
             3600
           );
+
           console.log(`Result saved at key: ${resultKey}`);
         });
 
@@ -138,7 +139,7 @@ const processQueue = async () => {
       await container.remove();
       fs.unlinkSync(codePath);
     } catch (error) {
-      console.error("Error processing task:", error.message);
+      console.error("Error processing task:", error);
     }
   }
 };
