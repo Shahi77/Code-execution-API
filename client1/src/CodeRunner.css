@@ -1,58 +1,99 @@
 .code-runner {
     background-color: #ffffff;
-    border-radius: 8px;
-    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-    padding: 20px;
-    width: 80%;
-    max-width: 600px;
+    border-radius: 12px;
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.08);
+    padding: 32px;
+    width: 90%;
+    max-width: 800px;
+    margin: 2rem auto;
 }
 
 h1 {
-    color: #52616b;
+    color: #db2777;
     text-align: center;
-    margin-bottom: 20px;
+    margin-bottom: 24px;
+    font-weight: 600;
+    font-size: 1.75rem;
 }
 
 textarea {
-    width: 100%;
-    height: 150px;
-    margin-bottom: 10px;
-    border: 1px solid #c9d6df;
-    border-radius: 4px;
-    padding: 8px;
+    width: 95%;
+    height: 200px;
+    margin-bottom: 16px;
+    border: 1px solid #fce7f3;
+    border-radius: 8px;
+    padding: 16px;
     resize: vertical;
+    background-color: #fdf2f8;
+    color: #831843;
+    font-family: 'Menlo', 'Monaco', 'Courier New', monospace;
+    font-size: 14px;
+    line-height: 1.5;
+    transition: border-color 0.2s ease;
+}
+
+textarea:focus {
+    outline: none;
+    border-color: #ec4899;
+    box-shadow: 0 0 0 3px rgba(236, 72, 153, 0.15);
 }
 
 .controls {
     display: flex;
-    justify-content: space-between;
-    margin-bottom: 10px;
+    gap: 12px;
+    margin-bottom: 16px;
 }
 
 select,
 button {
-    padding: 8px;
-    border: 1px solid #c9d6df;
-    border-radius: 4px;
-    background-color: #ffffff;
+    padding: 8px 16px;
+    border-radius: 6px;
+    font-size: 14px;
+    font-weight: 500;
+    transition: all 0.2s ease;
+}
+
+select {
+    background-color: #fdf2f8;
+    border: 1px solid #fce7f3;
+    color: #831843;
+    min-width: 120px;
+    cursor: pointer;
+}
+
+select:focus {
+    outline: none;
+    border-color: #ec4899;
+    box-shadow: 0 0 0 3px rgba(236, 72, 153, 0.15);
 }
 
 button {
-    background-color: #52616b;
-    color: #ffffff;
+    background-color: #f26aae;
+    color: white;
+    border: none;
     cursor: pointer;
-    transition: background-color 0.3s;
+    flex-grow: 1;
 }
 
 button:hover {
-    background-color: #1e2022;
+    background-color: #f24794;
+}
+
+button:disabled {
+    background-color: #fce7f3;
+    cursor: not-allowed;
 }
 
 .output {
-    background-color: #d34545;
-    border-radius: 4px;
-    padding: 10px;
-    min-height: 100px;
+    background-color: #fdf2f8;
+    border-radius: 8px;
+    padding: 16px;
+    min-height: 120px;
     white-space: pre-wrap;
     word-wrap: break-word;
+    color: #831843;
+    font-family: 'Menlo', 'Monaco', 'Courier New', monospace;
+    font-size: 14px;
+    line-height: 1.5;
+    border: 1px solid #fce7f3;
 }
