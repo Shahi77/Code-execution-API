@@ -22,7 +22,7 @@ function CodeRunner() {
 
     try {
       const response = await axios.post(
-        "http://localhost:3001/v1/docker/execute",
+        "https://api.code.shahi77.dev/v1/docker/execute",
         {
           language,
           code,
@@ -39,7 +39,7 @@ function CodeRunner() {
       const pollResult = async () => {
         try {
           const resultResponse = await axios.get(
-            `http://localhost:3001/v1/docker/result/${taskId}`
+            `http://api.code.shahi77.dev/v1/docker/result/${taskId}`
           );
           if (resultResponse.data.status === "completed") {
             setOutput(resultResponse.data.output);
