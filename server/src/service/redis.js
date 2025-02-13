@@ -2,18 +2,24 @@ const Redis = require("ioredis");
 
 class RedisQueue {
   constructor() {
-    this.redisClient = new Redis({
-      host: process.env.REDIS_HOST,
-      port: process.env.REDIS_PORT,
-      password: process.env.REDIS_PASSWORD,
-      username: process.env.REDIS_USERNAME,
-    }); // for adding tasks
-    this.consumerClient = new Redis({
-      host: process.env.REDIS_HOST,
-      port: process.env.REDIS_PORT,
-      password: process.env.REDIS_PASSWORD,
-      username: process.env.REDIS_USERNAME,
-    }); //for consuming tasks
+    this.redisClient = new Redis(process.env.REDIS_URL); // for adding tasks
+    this.consumerClient = new Redis(process.env.REDIS_URL); // for consuming tasks
+
+    this.redisClient.on("connect", () => {
+      console.log("Redis connected (redisClient)");
+    });
+
+    this.consumerClient.on("connect", () => {
+      console.log("Redis connected (consumerClient)");
+    });
+
+    this.redisClient.on("error", (err) => {
+      console.error("Redis error (redisClient):", err);
+    });
+
+    this.consumerClient.on("error", (err) => {
+      console.error("Redis error (consumerClient):", err);
+    });
   }
 
   async addToQueue(key, value) {
