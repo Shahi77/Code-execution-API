@@ -5,6 +5,7 @@ const cors = require("cors");
 const cookieParser = require("cookie-parser");
 const bodyParser = require("body-parser");
 const v1Router = require("./routes/version1Routes");
+const morgan = require("morgan");
 
 const PORT = process.env.PORT || 3001;
 
