@@ -8,7 +8,7 @@ const docker = new Docker(); // Windows-compatible
 const processQueue = async () => {
   console.log("Worker started, waiting for tasks...");
   while (true) {
-    const task = await redisQueue.consumeFromQueue("code_execution_queue");
+    const task = await redisQueue.consumeFromQueue("code_execution:queue");
     if (!task) continue;
 
     const { language, code, taskId } = task;
